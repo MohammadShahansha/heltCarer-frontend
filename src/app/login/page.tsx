@@ -1,3 +1,4 @@
+"use client";
 import {
   Box,
   Button,
@@ -10,8 +11,39 @@ import {
 import Image from "next/image";
 import assets from "@/assets";
 import Link from "next/link";
+import { SubmitHandler, useForm } from "react-hook-form";
+import { useRouter } from "next/navigation";
+import { userLogin } from "@/service/actions/userLogin";
+import { storeUserInfo } from "@/service/auth.services";
+import { toast } from "sonner";
+
+export type TPatientLoginForm = {
+  email: string;
+  password: string;
+};
 
 const LoginPage = () => {
+  const router = useRouter();
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors },
+  } = useForm<TPatientLoginForm>();
+  const onSubmit: SubmitHandler<TPatientLoginForm> = async (values) => {
+    // console.log(data);
+    try {
+      const res = await userLogin(values);
+      // console.log(res);
+      if (res?.data?.accessToken) {
+        toast.success("user login successfully");
+        storeUserInfo({ accessToken: res?.data?.accessToken });
+        router.push("/");
+      }
+    } catch (err: any) {
+      console.log(err.messsage);
+    }
+  };
   return (
     <Container>
       <Stack
@@ -52,26 +84,26 @@ const LoginPage = () => {
           </Stack>
 
           <Box mt={3}>
-            <form>
+            <form onSubmit={handleSubmit(onSubmit)}>
               <Grid container spacing={3}>
                 <Grid item md={6}>
                   <TextField
-                    id="outlined-basic"
                     label="Email"
                     type="email"
                     variant="outlined"
                     size="small"
                     fullWidth={true}
+                    {...register("email")}
                   />
                 </Grid>
                 <Grid item md={6}>
                   <TextField
-                    id="outlined-basic"
                     label="Password"
                     type="password"
                     variant="outlined"
                     size="small"
                     fullWidth={true}
+                    {...register("password")}
                   />
                 </Grid>
               </Grid>
@@ -89,6 +121,7 @@ const LoginPage = () => {
                 sx={{
                   marginTop: "20px",
                 }}
+                type="submit"
               >
                 Login
               </Button>

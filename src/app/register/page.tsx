@@ -16,6 +16,8 @@ import { modyfiPayload } from "@/utils/modifyFormData";
 import { registerPatient } from "@/service/actions/registerPatient";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { userLogin } from "@/service/actions/userLogin";
+import { storeUserInfo } from "@/service/auth.services";
 
 interface IPatientData {
   name: string;
@@ -44,7 +46,15 @@ const RegisterPage = () => {
       const res = await registerPatient(data);
       if (res?.data?.id) {
         toast.success(res?.message);
-        router.push("/login");
+        const directLoggin = await userLogin({
+          email: values.patient.email,
+          password: values.password,
+        });
+        // console.log(res);
+        if (directLoggin?.data?.accessToken) {
+          storeUserInfo({ accessToken: directLoggin?.data?.accessToken });
+          router.push("/");
+        }
       }
     } catch (err: any) {
       console.log(err.messsage);
