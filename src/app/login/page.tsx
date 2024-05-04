@@ -11,37 +11,37 @@ import {
 import Image from "next/image";
 import assets from "@/assets";
 import Link from "next/link";
-import { SubmitHandler, useForm } from "react-hook-form";
+import { FieldValues, SubmitHandler, useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { userLogin } from "@/service/actions/userLogin";
 import { storeUserInfo } from "@/service/auth.services";
 import { toast } from "sonner";
+import HCForms from "@/components/Forms/HCForms";
+import HCInput from "@/components/Forms/HCInput";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useState } from "react";
 
-export type TPatientLoginForm = {
-  email: string;
-  password: string;
-};
-
+export const validatinSchema = z.object({
+  email: z.string().email("Please inter a valid email"),
+  password: z.string().min(5, "Must be at least 5 characters"),
+});
 const LoginPage = () => {
   const router = useRouter();
-  const {
-    register,
-    handleSubmit,
-    watch,
-    formState: { errors },
-  } = useForm<TPatientLoginForm>();
-  const onSubmit: SubmitHandler<TPatientLoginForm> = async (values) => {
-    // console.log(data);
+
+  const [error, setError] = useState("");
+  const handleLoggin: SubmitHandler<FieldValues> = async (values) => {
     try {
       const res = await userLogin(values);
-      // console.log(res);
       if (res?.data?.accessToken) {
         toast.success("user login successfully");
         storeUserInfo({ accessToken: res?.data?.accessToken });
         router.push("/");
+      } else {
+        setError(res.message);
       }
     } catch (err: any) {
-      console.log(err.messsage);
+      console.log("here are some problem");
     }
   };
   return (
@@ -82,28 +82,48 @@ const LoginPage = () => {
               </Typography>
             </Box>
           </Stack>
-
+          {error && (
+            <Box
+              sx={{
+                backgroundColor: "red",
+                display: "flex",
+                justifyContent: "center",
+              }}
+            >
+              <Typography
+                sx={{
+                  fontSize: "20px",
+                  color: "white",
+                }}
+              >
+                {error}
+              </Typography>
+            </Box>
+          )}
           <Box mt={3}>
-            <form onSubmit={handleSubmit(onSubmit)}>
+            <HCForms
+              onSubmit={handleLoggin}
+              resolver={zodResolver(validatinSchema)}
+              defaultValues={{
+                email: "",
+                password: "",
+              }}
+            >
               <Grid container spacing={3}>
                 <Grid item md={6}>
-                  <TextField
+                  <HCInput
+                    name="email"
                     label="Email"
                     type="email"
-                    variant="outlined"
-                    size="small"
                     fullWidth={true}
-                    {...register("email")}
                   />
                 </Grid>
                 <Grid item md={6}>
-                  <TextField
+                  <HCInput
+                    name="password"
                     label="Password"
                     type="password"
-                    variant="outlined"
-                    size="small"
                     fullWidth={true}
-                    {...register("password")}
                   />
                 </Grid>
               </Grid>
@@ -138,7 +158,7 @@ const LoginPage = () => {
                   <Box color="primary.main">Register</Box>
                 </Link>
               </Typography>
-            </form>
+            </HCForms>
           </Box>
         </Box>
       </Stack>

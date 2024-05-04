@@ -11,35 +11,56 @@ import {
 import Image from "next/image";
 import assets from "@/assets";
 import Link from "next/link";
-import { useForm, SubmitHandler } from "react-hook-form";
+import { useForm, SubmitHandler, FieldValues } from "react-hook-form";
 import { modyfiPayload } from "@/utils/modifyFormData";
 import { registerPatient } from "@/service/actions/registerPatient";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { userLogin } from "@/service/actions/userLogin";
 import { storeUserInfo } from "@/service/auth.services";
+import HCForms from "@/components/Forms/HCForms";
+import HCInput from "@/components/Forms/HCInput";
+import { z } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 
-interface IPatientData {
-  name: string;
-  email: string;
-  contactNumber: string;
-  address: string;
-}
+// interface IPatientData {
+//   name: string;
+//   email: string;
+//   contactNumber: string;
+//   address: string;
+// }
 
-interface IPatientFormData {
-  password: string;
-  patient: IPatientData;
-}
+// interface IPatientFormData {
+//   password: string;
+//   patient: IPatientData;
+// }
+export const patientValidationSchema = z.object({
+  name: z.string().min(1, "Please inter your name"),
+  email: z.string().email("Please inter your valid email address"),
+  contactNumber: z
+    .string()
+    .regex(/^\d{11}$/, "Please provide a valid phone number"),
+  address: z.string().min(1, "Please inter a valid address"),
+});
+
+export const validationSchema = z.object({
+  password: z.string().min(5, "Must be inted at least 5 characters"),
+  patient: patientValidationSchema,
+});
+export const defaultValues = {
+  password: "",
+  patient: {
+    name: "",
+    email: "",
+    contactNumber: "",
+    address: "",
+  },
+};
 
 const RegisterPage = () => {
   const router = useRouter();
-  const {
-    register,
-    handleSubmit,
-    watch,
-    formState: { errors },
-  } = useForm<IPatientFormData>();
-  const onSubmit: SubmitHandler<IPatientFormData> = async (values) => {
+
+  const handleRegister = async (values: FieldValues) => {
     const data = modyfiPayload(values);
     // console.log(data);
     try {
@@ -99,55 +120,44 @@ const RegisterPage = () => {
             </Box>
           </Stack>
           <Box mt={3}>
-            <form onSubmit={handleSubmit(onSubmit)}>
+            <HCForms
+              onSubmit={handleRegister}
+              resolver={zodResolver(validationSchema)}
+              defaultValues={defaultValues}
+            >
               <Grid container spacing={3}>
                 <Grid item md={12}>
-                  <TextField
-                    label="Name"
-                    variant="outlined"
-                    size="small"
-                    fullWidth={true}
-                    {...register("patient.name")}
-                  />
+                  <HCInput label="Name" fullWidth={true} name="patient.name" />
                 </Grid>
                 <Grid item md={6}>
-                  <TextField
+                  <HCInput
                     label="Email"
                     type="email"
-                    variant="outlined"
-                    size="small"
                     fullWidth={true}
-                    {...register("patient.email")}
+                    name="patient.email"
                   />
                 </Grid>
                 <Grid item md={6}>
-                  <TextField
+                  <HCInput
                     label="Password"
                     type="password"
-                    variant="outlined"
-                    size="small"
                     fullWidth={true}
-                    {...register("password")}
+                    name="password"
                   />
                 </Grid>
                 <Grid item md={6}>
-                  <TextField
+                  <HCInput
                     label="Contact Number"
                     type="tel"
-                    variant="outlined"
-                    size="small"
                     fullWidth={true}
-                    {...register("patient.contactNumber")}
+                    name="patient.contactNumber"
                   />
                 </Grid>
                 <Grid item md={6}>
-                  <TextField
+                  <HCInput
                     label="Address"
-                    type="text"
-                    variant="outlined"
-                    size="small"
                     fullWidth={true}
-                    {...register("patient.address")}
+                    name="patient.address"
                   />
                 </Grid>
               </Grid>
@@ -173,7 +183,7 @@ const RegisterPage = () => {
                   <Box color="primary.main">Login</Box>
                 </Link>
               </Typography>
-            </form>
+            </HCForms>
           </Box>
         </Box>
       </Stack>
