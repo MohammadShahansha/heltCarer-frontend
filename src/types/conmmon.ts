@@ -17,3 +17,19 @@ export type drawerItem = {
   icon?: OverridableComponent<SvgIconTypeMap<{}, "svg">> & { muiName: string };
   child?: drawerItem[];
 };
+
+export type responseSuccessType = {
+  data: any;
+  meta: TMeta;
+};
+
+export type TGenericErrorMessage = {
+  path: string | number;
+  message: string;
+};
+
+export type TGenericErrorRespnse = {
+  statusCode: number;
+  message: string;
+  errorMessage: TGenericErrorMessage[];
+};

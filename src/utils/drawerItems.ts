@@ -40,8 +40,8 @@ export const drawerItems = (role: userRole): drawerItem[] => {
           icon: Diversity2Icon,
         },
         {
-          title: "Doctor",
-          path: `${role}/doctor`,
+          title: "Doctors",
+          path: `${role}/doctors`,
           icon: MedicalServicesIcon,
         },
         {

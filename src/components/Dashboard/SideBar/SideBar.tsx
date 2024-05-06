@@ -6,8 +6,16 @@ import Link from "next/link";
 import { drawerItems } from "@/utils/drawerItems";
 import { userRole } from "@/types";
 import SidebarItem from "./SidebarItem";
+import { getUserInfo } from "@/service/auth.services";
+import { useEffect, useState } from "react";
 
 const SideBar = () => {
+  const [userRole, setUserRole] = useState("");
+  useEffect(() => {
+    const { role } = getUserInfo();
+    setUserRole(role);
+  }, []);
+
   //   const drawer = (
   //     <div>
   //       <List>
@@ -57,8 +65,8 @@ const SideBar = () => {
         </Typography>
       </Stack>
       <List>
-        {drawerItems("admin" as userRole).map((item, index) => (
-          <SidebarItem key={index} index={index} item={item} />
+        {drawerItems(userRole as userRole).map((item, index) => (
+          <SidebarItem key={index} item={item} />
         ))}
       </List>
     </Box>

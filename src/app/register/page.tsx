@@ -74,7 +74,7 @@ const RegisterPage = () => {
         // console.log(res);
         if (directLoggin?.data?.accessToken) {
           storeUserInfo({ accessToken: directLoggin?.data?.accessToken });
-          router.push("/");
+          router.push("/dashboard");
         }
       }
     } catch (err: any) {

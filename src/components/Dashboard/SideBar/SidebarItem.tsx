@@ -6,23 +6,34 @@ import {
   ListItemText,
 } from "@mui/material";
 
-import MailIcon from "@mui/icons-material/Mail";
-import InboxIcon from "@mui/icons-material/MoveToInbox";
 import { drawerItem } from "@/types";
+import { usePathname } from "next/navigation";
 
 type TProps = {
   item: drawerItem;
-  index: number;
 };
 
-const SidebarItem = ({ item, index }: TProps) => {
+const SidebarItem = ({ item }: TProps) => {
+  const linkPath = `/dashboard/${item.path}`;
+  const pathName = usePathname();
   return (
-    <Link href="/">
-      <ListItem disablePadding>
+    <Link href={linkPath}>
+      <ListItem
+        disablePadding
+        sx={{
+          ...(pathName === linkPath
+            ? {
+                borderRight: "3px solid #1586FD",
+                "& svg": {
+                  color: "#1586FD",
+                },
+              }
+            : {}),
+          marginTop: "8px",
+        }}
+      >
         <ListItemButton>
-          <ListItemIcon>
-            {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-          </ListItemIcon>
+          <ListItemIcon>{item.icon && <item.icon />}</ListItemIcon>
           <ListItemText primary={item.title} />
         </ListItemButton>
       </ListItem>
