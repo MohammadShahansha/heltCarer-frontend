@@ -2,18 +2,41 @@
 import { Box, Button, IconButton, Stack, TextField } from "@mui/material";
 import { useState } from "react";
 import DoctorsModel from "./components/DoctorsModel";
-import { useGetAllDoctorQuery } from "@/redux/api/doctosApi";
+import {
+  useDeleteDoctorMutation,
+  useGetAllDoctorQuery,
+} from "@/redux/api/doctosApi";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import DeleteIcon from "@mui/icons-material/Delete";
+import { useDebounced } from "@/redux/hooks";
+import { toast } from "sonner";
 
 const DoctorPage = () => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const { data, isLoading } = useGetAllDoctorQuery({});
+  const [deleteDoctor] = useDeleteDoctorMutation();
+  ///search implementation
+  const query: Record<string, any> = {};
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  // console.log(searchTerm);
+  const debouncedTerm = useDebounced({
+    searchQuery: searchTerm,
+    delay: 600,
+  });
+  if (!!debouncedTerm) {
+    query["searchTerm"] = searchTerm;
+  }
+
+  const { data, isLoading } = useGetAllDoctorQuery({ ...query });
   const doctors = data?.doctors;
   const meta = data?.meta;
 
   const handleDelete = async (id: string) => {
+    console.log(id);
     try {
+      const res = await deleteDoctor(id).unwrap();
+      if (res?.id) {
+        toast.success("delete doctor successfully");
+      }
     } catch (err: any) {
       console.log(err.message);
     }
@@ -48,7 +71,11 @@ const DoctorPage = () => {
           open={isModalOpen}
           setOpen={setIsModalOpen}
         ></DoctorsModel>
-        <TextField size="small" placeholder="search doctor" />
+        <TextField
+          onChange={(e) => setSearchTerm(e.target.value)}
+          size="small"
+          placeholder="search doctor"
+        />
       </Stack>
       <Box my={1}>
         {!isLoading ? (
